@@ -1,19 +1,87 @@
-
-const tleLine1 = '1 00902U 64063E   23165.60556257  .00000047  00000+0  57989-4 0  9995';
-const tleLine2 = '2 00902  90.2055  51.1520 0018571 170.3974 259.4735 13.52752592707731';
-
-
 let loaddatabtn = document.getElementById("loaddatabtn")
+let refreshbtn = document.getElementById("refreshbtn")
+
+let drawtrail = document.getElementById("drawtrail")
+
+let dateinput = document.getElementById("dateinput")
+let timeinput = document.getElementById("timeinput")
+
+
+let canvaswidth = document.getElementById("map").clientWidth
+let now = new Date(); // Use the current time or specify a custom time
+var year = now.getFullYear();
+var month = String(now.getMonth() + 1).padStart(2, '0');
+var day = String(now.getDate()).padStart(2, '0');
+var formattedDate = year + '-' + month + '-' + day;
+
+dateinput.value = formattedDate;
+
+var hours = String(now.getHours()).padStart(2, '0');
+var minutes = String(now.getMinutes()).padStart(2, '0');
+var formattedTime = hours + ':' + minutes;
+
+timeinput.value = formattedTime;
+
+let backimg
+
+
+
+
 loaddatabtn.addEventListener("click", (e) => {
 
 
-    //load txt file
+
+    setInterval(() => {
+        //load txt file
+
+        if (!drawtrail.checked) {
+            background(255);
+
+            image(backimg, 0, 0, canvaswidth, canvaswidth * 0.5);
+        }
+
+
+        fetch('/active.txt')
+            .then(response => response.text())
+            .then(data => {
+
+                // console.log(data)
+                now = new Date();
+                // iterate over the data
+                const lines = data.split('\n'); // Split the file content into an array of lines
+                console.log(lines.length)
+                // add number of satellites to ui
+                document.getElementById("satcount").innerText = Math.floor(lines.length / 3)
+
+
+                var j = 0
+                for (let i = 0; i < lines.length - 10; i += 3) {
+                    const line1 = lines[i];
+                    const line2 = lines[i + 1];
+                    const line3 = lines[i + 2];
+                    let coords = calculatecoordinates(line2, line3)
+                    pinitonmap(coords[0], coords[1], line1, j)
+                    j++
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }, 2000);
+})
+
+refreshbtn.addEventListener("click", (e) => {
+    now = createDateObject()
+    background(255);
+
+    image(backimg, 0, 0, canvaswidth, canvaswidth * 0.5);
+
+
     fetch('/active.txt')
         .then(response => response.text())
         .then(data => {
 
             // console.log(data)
-
             // iterate over the data
             const lines = data.split('\n'); // Split the file content into an array of lines
             console.log(lines.length)
@@ -29,25 +97,18 @@ loaddatabtn.addEventListener("click", (e) => {
                 let coords = calculatecoordinates(line2, line3)
                 pinitonmap(coords[0], coords[1], line1, j)
                 j++
-
             }
-
-
-
-
-
-
-
-
         })
         .catch(error => {
             console.error('Error:', error);
         });
 
-
-
-
 })
+
+//load txt file
+
+
+
 
 function calculatecoordinates(tleLine1, tleLine2) {
 
@@ -59,7 +120,7 @@ function calculatecoordinates(tleLine1, tleLine2) {
     const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
 
     // Calculate the satellite's position at a specific point in time
-    const now = new Date(); // Use the current time or specify a custom time
+
     const positionAndVelocity = satellite.propagate(satrec, now);
 
     // Extract the satellite's position coordinates
@@ -93,9 +154,6 @@ function calculatecoordinates(tleLine1, tleLine2) {
 
 }
 
-
-
-
 function pinitonmap(x, y, name, j) {
 
     let jj = processNumber(j)
@@ -108,7 +166,6 @@ function pinitonmap(x, y, name, j) {
 
 }
 
-
 function processNumber(input) {
     if (input < 360) {
         return input;
@@ -118,12 +175,27 @@ function processNumber(input) {
 }
 
 
-let canvaswidth = document.getElementById("map").clientWidth
+function createDateObject() {
+    var dateInput = dateinput
+    var timeInput = timeinput
+
+    var dateValue = dateInput.value;
+    var timeValue = timeInput.value;
+
+    // Concatenate the date and time values
+    var dateTimeValue = dateValue + 'T' + timeValue;
+
+    // Create a JavaScript Date object using the concatenated value
+    var jsDate = new Date(dateTimeValue);
+
+    // Output the JavaScript Date object to the console
+    return jsDate
+}
+
+
 
 
 function setup() {
-
-    // Create a p5.js canvas
     const canvas = createCanvas(canvaswidth, canvaswidth * 0.5);
 
     // Attach the canvas to the 'canvas-container' div
@@ -131,14 +203,41 @@ function setup() {
     colorMode(HSB);
 
     loadImage('world_map.png', function (img) {
+        backimg = img
         image(img, 0, 0, canvaswidth, canvaswidth * 0.5);
+
+        fetch('/active.txt')
+            .then(response => response.text())
+            .then(data => {
+
+                // console.log(data)
+                now = new Date();
+                // iterate over the data
+                const lines = data.split('\n'); // Split the file content into an array of lines
+                console.log(lines.length)
+                // add number of satellites to ui
+                document.getElementById("satcount").innerText = Math.floor(lines.length / 3)
+
+
+                var j = 0
+                for (let i = 0; i < lines.length - 10; i += 3) {
+                    const line1 = lines[i];
+                    const line2 = lines[i + 1];
+                    const line3 = lines[i + 2];
+                    let coords = calculatecoordinates(line2, line3)
+                    pinitonmap(coords[0], coords[1], line1, j)
+                    j++
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
 
 
 }
 
 function draw() {
-    // Add your drawing code here
     // background(220);
 
 }

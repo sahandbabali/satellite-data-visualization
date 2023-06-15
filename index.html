@@ -37,18 +37,24 @@
                 <div class="row">
                     <div class="col">
                         <h4>Satellite count: <span id="satcount">0</span></h4>
-                        <button id="loaddatabtn" type="button" class="btn btn-primary">Load data</button>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="drawtrail">
+                            <label class="form-check-label" for="flexCheckDefault">
+                                Draw trail
+                            </label>
+                        </div>
+                        <button id="loaddatabtn" type="button" class="btn btn-primary">Live update</button>
                     </div>
                     <div class="col">
                         <h4>Historical info</h4>
 
                         <div class="row">
                             <div class="col">
-                                <input class="form-control" type="date" id="date-input">
+                                <input class="form-control" type="date" id="dateinput">
 
                             </div>
                             <div class="col">
-                                <input class="form-control" type="time" id="time-input">
+                                <input class="form-control" type="time" id="timeinput">
 
                             </div>
 
@@ -56,9 +62,8 @@
 
 
 
-                        <br>
 
-                        <button id="refreshbtn" type="button" class="btn btn-primary ">Refresh</button>
+                        <button id="refreshbtn" type="button" class="btn btn-primary mt-2">Refresh</button>
 
 
                     </div>
